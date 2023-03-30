@@ -16,9 +16,11 @@ cur.execute("SELECT id FROM accounts")
 accounts = cur.fetchall()
 fields_values_r = []
 values = ["__uninformed__", "__card__", "__check__", "__cash__", "__wire__", "__paypal__", "__mobile__"]
+cur.execute("UPDATE invoices SET payment_method = '__uninformed__' WHERE payment_method is NULL")
+
 for index, item in enumerate(values):
   cur.execute("UPDATE templates_settings SET value = %s WHERE value = %s AND field = 'payment_method'", (item, str(index)))
-  cur.execute("UPDATE invoices SET payment_method = %s WHERE payment_method = %s", (item, index))
+  cur.execute("UPDATE invoices SET payment_method = %s WHERE payment_method = %s", (item, str(index)))
   cur.execute("SELECT accounts.id, fields.id AS fieldId FROM esus_dev.fields fields LEFT JOIN esus_dev.accounts accounts ON fields.account_id = accounts.id WHERE fields.name = %s AND fields.deleted_at is NULL AND fields.object_type = 'payment_means' GROUP BY accounts.id", item)
   res = cur.fetchall()
   for account in accounts:
