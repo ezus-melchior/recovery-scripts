@@ -5,7 +5,7 @@ from datetime import datetime
 
 ### Variables à changer ###
 env = "esus_dev"
-object_types = ["prestations"]
+object_types = ["prestations_catalog"]
 filtres = [
     {"label": "Product Title", "name": "product_title"},
 ]
