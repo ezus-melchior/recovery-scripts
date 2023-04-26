@@ -35,6 +35,13 @@ for media in medias:
     size_values.append([get_image_size(media["path_full"]), media["path_full"]])
 sql_query = "UPDATE media SET size = %s WHERE path_full = %s"
 cur.executemany(sql_query, size_values)
+cur.execute("SELECT DISTINCT path_full FROM items_descriptifs WHERE deleted_at is NULL AND size is NULL AND object_type = 'media'")
+medias = cur.fetchall()
+size_values = []
+for media in medias:
+    size_values.append([get_image_size(media["value"]), media["value"]])
+sql_query = "UPDATE items_descriptifs SET size = %s WHERE value = %s"
+cur.executemany(sql_query, size_values)
 
 conn.commit()
 
