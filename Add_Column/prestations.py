@@ -5,12 +5,20 @@ from datetime import datetime
 
 ### Variables à changer ###
 env = "esus_dev"
-object_types = ["prestations_catalog"]
+object_types = ["supplier_products"]
 filtres = [
-    {"label": "Product Title", "name": "product_title"},
+    {"label": "Title", "name": "product_title", 'default':'1'},
+    {"label": "Quantity", "name": "quantity",'default':'1'},
+    {"label": "Purchase price TTC", "name": "purchase_price_ttc", 'default': '1'},
+    {"label": "Purchase price HT", "name": "purchase_price_ht", 'default': '0'},
+    {"label": "Sales Price TTC", "name": "sales_price_ttc", 'default': '1'},
+    {"label": "Sales Price HT", "name": "sales_price_ht", 'default': '0'},
+    {"label": "VAT rate", "name": "vat_rate", 'default': '1'},
+    {"label": "Slide", "name": "slide", 'default': '1'},
+    {"label": "Created at", "name": "created_at", 'default': '1'},
+    {"label": "Updated at", "name": "updated_at", 'default': '1'},
 ]
 sort_order = '99'
-val = '0'
 ### FIN Variables ###
 
 conn, tunnel = conn_init(env)
@@ -18,6 +26,8 @@ cur = conn.cursor()
 i = 0
 filtres_r = []
 print ("***** Debut esus/column-gen.py *****")
+# cur.execute("INSERT INTO filtres (id, account_id, user_id, name, label, type, sort_order, val, is_signed, created_by, updated_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (str(uuid.uuid4()), '0', '0', 'id', 'id', 'supplier_products', '0', '1', '0', '0', '0'))
+
 
 # Case 1 : For columns generation
 i = 1
@@ -29,28 +39,16 @@ for object_type in object_types:
         print (str(i) + " - " + u["user_id"])
         f_id = str(uuid.uuid4())[:-2]
         j = 1
-        for f in filtres:
+        for idx, f in enumerate(filtres):
             filtre_id = f_id
-            if j< 10:
+            if j < 10:
                 filtre_id += "0"
             filtre_id += str(j)
-            filtres_r.append((filtre_id, '0', u["user_id"], f["name"], f["label"], object_type, sort_order, val, '', '0', u["user_id"], u["user_id"]))
+            filtres_r.append((filtre_id, '0', u["user_id"], f["name"], f["label"], object_type, idx, f["default"], '', '0', u["user_id"], u["user_id"]))
             j += 1
         i += 1
-
-# Case 2 : For project stages generation
-# is_signed = 0
-# cur.execute("SELECT id FROM accounts")
-# conn.commit()
-# accounts = cur.fetchall()
-# i = 1
-# for a in accounts:
-#     print (str(i) + " - " + a["id"])
-#     name = str(uuid.uuid4())
-#     filtre_id = str(uuid.uuid4())
-#     filtres_r.append((filtre_id, a["id"], '0', name, label, object_type, 1, 1, '#000000', is_signed, '0', '0'))
-#     conn.commit()
-#     i = i + 1
+    
+print(filtres_r)
 
 
 # Excecute many
