@@ -49,7 +49,7 @@ while has_media is True:
         print (f"batch favicon_path accounts {i}")
         size_values = []
         for media in medias:
-            size_values.append([get_image_size(media["logo_path"]), media["id"]])
+            size_values.append([get_image_size(media["favicon_path"]), media["id"]])
         print("--- before update %s seconds ---" % (time.time() - start_time))
         sql_query = "UPDATE accounts SET favicon_size = %s WHERE id = %s"
         cur.executemany(sql_query, size_values)
