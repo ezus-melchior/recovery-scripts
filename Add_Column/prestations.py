@@ -5,7 +5,7 @@ from datetime import datetime
 
 ### Variables à changer ###
 env = "esus_dev"
-object_types = ["supplier_products"]
+object_types = ["supplier_prestations"]
 filtres = [
     {"label": "Title", "name": "product_title", 'default':'1'},
     {"label": "Quantity", "name": "quantity",'default':'1'},
@@ -26,32 +26,33 @@ cur = conn.cursor()
 i = 0
 filtres_r = []
 print ("***** Debut esus/column-gen.py *****")
-# cur.execute("INSERT INTO filtres (id, account_id, user_id, name, label, type, sort_order, val, is_signed, created_by, updated_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (str(uuid.uuid4()), '0', '0', 'id', 'id', 'supplier_products', '0', '1', '0', '0', '0'))
+
+# UNCOMMENT TO ADD FIRST TIME
+cur.execute("INSERT INTO filtres (id, account_id, user_id, name, label, type, sort_order, val, is_signed, created_by, updated_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (str(uuid.uuid4()), '0', '0', 'Sort order supplier', 'sort_order_supplier', 'supplier_prestations', '0', '0', '0', '0', '0'))
 
 
-# Case 1 : For columns generation
-i = 1
-for object_type in object_types:
-    cur.execute("SELECT Distinct user_id FROM filtres WHERE (deleted_at is NULL OR deleted_at = '') AND type = %s", object_type)
-    conn.commit()
-    users = cur.fetchall()
-    for u in users:
-        print (str(i) + " - " + u["user_id"])
-        f_id = str(uuid.uuid4())[:-2]
-        j = 1
-        for idx, f in enumerate(filtres):
-            filtre_id = f_id
-            if j < 10:
-                filtre_id += "0"
-            filtre_id += str(j)
-            filtres_r.append((filtre_id, '0', u["user_id"], f["name"], f["label"], object_type, idx, f["default"], '', '0', u["user_id"], u["user_id"]))
-            j += 1
-        i += 1
+# # Case 1 : For columns generation
+# i = 1
+# for object_type in object_types:
+#     cur.execute("SELECT Distinct user_id FROM filtres WHERE (deleted_at is NULL OR deleted_at = '') AND type = %s", object_type)
+#     conn.commit()
+#     users = cur.fetchall()
+#     for u in users:
+#         print (str(i) + " - " + u["user_id"])
+#         f_id = str(uuid.uuid4())[:-2]
+#         j = 1
+#         for idx, f in enumerate(filtres):
+#             filtre_id = f_id
+#             if j < 10:
+#                 filtre_id += "0"
+#             filtre_id += str(j)
+#             filtres_r.append((filtre_id, '0', u["user_id"], f["name"], f["label"], object_type, idx, f["default"], '', '0', u["user_id"], u["user_id"]))
+#             j += 1
+#         i += 1
     
-print(filtres_r)
 
 
-# Excecute many
-cur.executemany("INSERT INTO filtres (id, account_id, user_id, name, label, type, sort_order, val, color, is_signed, created_by, updated_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", filtres_r)
+# # Excecute many
+# cur.executemany("INSERT INTO filtres (id, account_id, user_id, name, label, type, sort_order, val, color, is_signed, created_by, updated_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", filtres_r)
 conn.commit()
 conn_close(conn, tunnel)
