@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
+import time
 from db_utils import conn_init, conn_close
 import requests
+import time
 from PIL import Image
 from io import BytesIO
 
 #### VARIABLE #####
 env ="esus_dev"
+LIMIT = "100"
 #### END OFVARIABLE #####
 def get_image_size(url):
     try:
@@ -19,30 +22,91 @@ conn, tunnel = conn_init(env)
 cur = conn.cursor()
 
 print("Start")
+start_time = time.time()
+has_media, i = True, 1
+while has_media is True:
+    cur.execute("SELECT id, value FROM brands WHERE deleted_at is NULL AND (size = -2 OR size is NULL) AND (field = 'logo' OR field = 'photo' OR field = 'favicon') ORDER BY created_at DESC LIMIT " + LIMIT)
+    medias = cur.fetchall()
+    has_media = True if len(medias) > 0 else False
+    if has_media is True:
+        print (f"batch brands {i}")
+        size_values = []
+        for media in medias:
+            size_values.append([get_image_size(media["value"]), media["id"]])
+        print("--- before update %s seconds ---" % (time.time() - start_time))
+        sql_query = "UPDATE brands SET size = %s WHERE id = %s"
+        cur.executemany(sql_query, size_values)
+        conn.commit()
+        print("--- after update %s seconds ---" % (time.time() - start_time))
+        i += 1
 
-cur.execute("SELECT DISTINCT path_full FROM media_activities WHERE deleted_at is NULL AND size is NULL")
-medias = cur.fetchall()
-size_values = []
-for media in medias:
-    size_values.append([get_image_size(media["path_full"]), media["path_full"]])
-sql_query = "UPDATE media_activities SET size = %s WHERE path_full = %s"
-cur.executemany(sql_query, size_values)
-cur.execute("SELECT DISTINCT path_full FROM media WHERE deleted_at is NULL AND size is NULL")
-medias = cur.fetchall()
-size_values = []
-for media in medias:
-    size_values.append([get_image_size(media["path_full"]), media["path_full"]])
-sql_query = "UPDATE media SET size = %s WHERE path_full = %s"
-cur.executemany(sql_query, size_values)
-cur.execute("SELECT DISTINCT value FROM items_descriptifs WHERE deleted_at is NULL AND size is NULL AND object_type = 'media'")
-medias = cur.fetchall()
-size_values = []
-for media in medias:
-    size_values.append([get_image_size(media["value"].split(';')[0]), media["value"]])
-sql_query = "UPDATE items_descriptifs SET size = %s WHERE value = %s"
-cur.executemany(sql_query, size_values)
+has_media, i = True, 1
+while has_media is True:
+    cur.execute("SELECT id, favicon_path FROM accounts WHERE deleted_at is NULL AND (favicon_size = -2 OR favicon_size is NULL) ORDER BY created_at DESC LIMIT " + LIMIT)
+    medias = cur.fetchall()
+    has_media = True if len(medias) > 0 else False
+    if has_media is True:
+        print (f"batch favicon_path accounts {i}")
+        size_values = []
+        for media in medias:
+            size_values.append([get_image_size(media["logo_path"]), media["id"]])
+        print("--- before update %s seconds ---" % (time.time() - start_time))
+        sql_query = "UPDATE accounts SET favicon_size = %s WHERE id = %s"
+        cur.executemany(sql_query, size_values)
+        conn.commit()
+        print("--- after update %s seconds ---" % (time.time() - start_time))
+        i += 1
 
-conn.commit()
+has_media, i = True, 1
+while has_media is True:
+    cur.execute("SELECT id, logo_path FROM accounts WHERE deleted_at is NULL AND (logo_size = -2 OR logo_size is NULL) ORDER BY created_at DESC LIMIT " + LIMIT)
+    medias = cur.fetchall()
+    has_media = True if len(medias) > 0 else False
+    if has_media is True:
+        print (f"batch logo_path accounts {i}")
+        size_values = []
+        for media in medias:
+            size_values.append([get_image_size(media["logo_path"]), media["id"]])
+        print("--- before update %s seconds ---" % (time.time() - start_time))
+        sql_query = "UPDATE accounts SET logo_size = %s WHERE id = %s"
+        cur.executemany(sql_query, size_values)
+        conn.commit()
+        print("--- after update %s seconds ---" % (time.time() - start_time))
+        i += 1
+
+has_media, i = True, 1
+while has_media is True:
+    cur.execute("SELECT id, favicon_path FROM accounts WHERE deleted_at is NULL AND (logo_size = -2 OR logo_size is NULL) ORDER BY created_at DESC LIMIT " + LIMIT)
+    medias = cur.fetchall()
+    has_media = True if len(medias) > 0 else False
+    if has_media is True:
+        print (f"batch favicon_path accounts {i}")
+        size_values = []
+        for media in medias:
+            size_values.append([get_image_size(media["favicon_path"]), media["id"]])
+        print("--- before update %s seconds ---" % (time.time() - start_time))
+        sql_query = "UPDATE accounts SET favicon_size = %s WHERE id = %s"
+        cur.executemany(sql_query, size_values)
+        conn.commit()
+        print("--- after update %s seconds ---" % (time.time() - start_time))
+        i += 1
+
+has_media, i = True, 1
+while has_media is True:
+    cur.execute("SELECT id, photo_path FROM users WHERE deleted_at is NULL AND (photo_size = -2 OR photo_size is NULL) ORDER BY created_at DESC LIMIT " + LIMIT)
+    medias = cur.fetchall()
+    has_media = True if len(medias) > 0 else False
+    if has_media is True:
+        print (f"batch photo_path users {i}")
+        size_values = []
+        for media in medias:
+            size_values.append([get_image_size(media["photo_path"]), media["id"]])
+        print("--- before update %s seconds ---" % (time.time() - start_time))
+        sql_query = "UPDATE users SET photo_size = %s WHERE id = %s"
+        cur.executemany(sql_query, size_values)
+        conn.commit()
+        print("--- after update %s seconds ---" % (time.time() - start_time))
+        i += 1
 
 print("Done")
 conn_close(conn, tunnel)
